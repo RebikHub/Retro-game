@@ -1,0 +1,23 @@
+{
+  "name": "ajs-retro-game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "webpack.config.js",
+  "scripts": {
+    "start": "webpack serve --mode development",
+    "test": "jest --coverage",
+    "lint": "eslint .",
+    "build": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RebikHub/ajs-retro-game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RebikHub/ajs-retro-game/issues"
+  },
+  "homepage": "https://github.com/RebikHub/ajs-retro-game#readme"
+}
