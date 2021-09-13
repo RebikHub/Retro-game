@@ -1,4 +1,3 @@
-import GamePlay from './GamePlay';
 import themes from './themes';
 
 export default class GameController {
