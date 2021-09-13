@@ -14,3 +14,8 @@ const gameCtrl = new GameController(gamePlay, stateService);
 gameCtrl.init();
 
 // don't write your code here
+
+// import Bowerman from './classes/bowerman';
+// const arh = new Bowerman(1);
+// arh.levelUp();
+// console.log(arh);
