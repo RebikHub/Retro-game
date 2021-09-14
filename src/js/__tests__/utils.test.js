@@ -1,4 +1,4 @@
-import { calcHealthLevel, calcTileType } from '../utils';
+import { calcTileType } from '../utils';
 
 test('render top-left', () => {
   expect(calcTileType(0, 8)).toBe('top-left');

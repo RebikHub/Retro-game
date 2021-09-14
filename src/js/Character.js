@@ -1,11 +1,13 @@
 export default class Character {
   constructor(type = 'generic') {
+    if (new.target === Character) {
+      throw new Error('user use new Character()!!!');
+    }
     this.level = 1;
     this.attack = 0;
     this.defence = 0;
     this.health = 50;
     this.type = type;
-    // TODO: throw error if user use "new Character()"
   }
 
   levelUp() {

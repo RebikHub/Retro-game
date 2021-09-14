@@ -1,4 +1,6 @@
 import themes from './themes';
+import { characterGenerator, generateTeam } from './generators';
+import Bowerman from './classes/bowerman';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
