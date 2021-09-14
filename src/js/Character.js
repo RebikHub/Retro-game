@@ -20,10 +20,4 @@ export default class Character {
       throw new Error('The deceased cannot be leveled!!!');
     }
   }
-
-  damage(points) {
-    if (this.health >= 0) {
-      this.health -= points * (1 - this.defence / 100);
-    }
-  }
 }

@@ -1,25 +1,25 @@
 export default class Team {
-  constructor() {
-    this.members = new Set();
-  }
+  // constructor() {
+  //   this.members = new Set();
+  // }
 
-  add(character) {
-    if (this.members.has(character)) {
-      throw new Error('Такой персонаж уже есть!');
-    }
-    return this.members.add(character);
-  }
+  // add(character) {
+  //   if (this.members.has(character)) {
+  //     throw new Error('Такой персонаж уже есть!');
+  //   }
+  //   return this.members.add(character);
+  // }
 
-  addAll(...character) {
-    const arr = [...character];
-    for (const c of arr) {
-      this.members.add(c);
-    }
-  }
+  // addAll(...character) {
+  //   const arr = [...character];
+  //   for (const c of arr) {
+  //     this.members.add(c);
+  //   }
+  // }
 
-  toArray() {
-    return Array.from(this.members);
-  }
+  // toArray() {
+  //   return Array.from(this.members);
+  // }
 
 //   * [Symbol.iterator]() {
 //     const range = this.members;
