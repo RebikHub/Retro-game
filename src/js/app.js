@@ -22,7 +22,5 @@ import Vampire from './classes/vampire';
 import Undead from './classes/undead';
 import { characterGenerator, generateTeam } from './generators';
 
-const arr = [Swordsman, Magician, Bowerman];
-const level = 1;
-const sd = characterGenerator(arr, level);
-console.log(sd.next().value);
+
+// console.log(gamePlay.cells[25]);
