@@ -11,6 +11,6 @@ test('not error use new Child extends Character', () => {
     defence: 10,
     health: 50,
     level: 1,
-    type: 'Swordsman',
+    type: 'swordsman',
   });
 });
