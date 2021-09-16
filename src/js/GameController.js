@@ -108,7 +108,7 @@ export default class GameController {
     let message = '';
     for (let i = 0; i < this.humanTeam.length; i += 1) {
       if (this.humanTeam[i].type === cellEnter.children[0].classList[1]) {
-        const health = cellEnter.lastChild.style.width;
+        const health = cellEnter.querySelector('.health-level-indicator').style.width;
         message = `${medal} ${this.humanTeam[i].level} ${swords} ${this.humanTeam[i].attack} ${shield} ${this.humanTeam[i].defence} ${heart} ${health}`;
         this.gamePlay.setCursor(cursors.pointer);
       }
