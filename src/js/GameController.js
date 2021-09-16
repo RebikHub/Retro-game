@@ -25,9 +25,9 @@ export default class GameController {
     this.level = 1;
     this.charCount = 2;
     this.selectHero = 1;
-    this.stateHero;
-    this.stateHeroMove;
-    this.stateHeroAttack;
+    this.stateHero = {};
+    this.stateHeroMove = 0;
+    this.stateHeroAttack = 0;
     this.moveHero = [];
     this.attackHero = [];
   }
@@ -132,7 +132,9 @@ export default class GameController {
 
   onCellLeave(index) {
     const cellLeave = this.gamePlay.cells[index];
-    this.gamePlay.deselectCell(index, 'green');
+    if (index !== this.selectHero) {
+      this.gamePlay.deselectCell(index);
+    }
     for (let i = 0; i < this.aiTeam.length; i += 1) {
       if (this.aiTeam[i].type === cellLeave.children[0].classList[1]) {
         this.gamePlay.deselectCell(index, 'red');
@@ -152,6 +154,7 @@ export default class GameController {
     } if (character.type === 'magician' || character.type === 'daemon') {
       return 2;
     }
+    return 'error not character!';
   }
 
   static attackCharacter(character) {
@@ -162,6 +165,7 @@ export default class GameController {
     } if (character.type === 'magician' || character.type === 'daemon') {
       return 5;
     }
+    return 'error not character!';
   }
 
   static cellsMove(char, index) {
