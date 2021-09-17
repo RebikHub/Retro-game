@@ -26,3 +26,13 @@ test('should cell -> red, cursor -> crosshair', () => {
   expect(gamePlay.setCursor(cursors.crosshair)).toEqual('crosshair');
   expect(gamePlay.selectCell(8, 'red')).toEqual('red');
 });
+
+test('should message -> erorr, cursor -> notallowed', () => {
+  const gamePlay = new GamePlay();
+  const message = 'Not you hero!!!';
+  gamePlay.setCursor.mockReturnValue('not-allowed');
+  GamePlay.showError.mockReturnValue('Not you hero!!!');
+
+  expect(gamePlay.setCursor(cursors.notallowed)).toEqual('not-allowed');
+  expect(GamePlay.showError(message)).toEqual('Not you hero!!!');
+});
