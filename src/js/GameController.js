@@ -30,6 +30,7 @@ export default class GameController {
     this.stateHeroAttack = 0;
     this.moveHero = [];
     this.attackHero = [];
+    this.clickIndex = {};
   }
 
   init() {
@@ -75,18 +76,33 @@ export default class GameController {
     }
   }
 
+  playMove(index, character) {
+    if (this.stateHero.character && this.moveHero.includes(index)) {
+      for (let i = 0; i < this.startPosition.length; i += 1) {
+        if (character.position === this.startPosition[i].position) {
+          this.startPosition[i].position = index;
+        }
+      }
+      this.gamePlay.redrawPositions(this.startPosition);
+    }
+  }
+
   onCellClick(index) {
+    if (this.stateHero) this.playMove(index, this.stateHero);
     const cellClick = this.gamePlay.cells[index];
     for (let i = 0; i < this.humanTeam.length; i += 1) {
       if (this.humanTeam[i].type === cellClick.children[0].classList[1]) {
         this.gamePlay.deselectCell(this.selectHero);
         this.selectHero = index;
         this.gamePlay.selectCell(index);
-        this.stateHero = GameState.from(this.humanTeam[i]);// next round logic!!!
-        this.stateHeroMove = GameController.moveCharacter(this.stateHero);
+        this.stateHero = GameState.from({
+          character: this.humanTeam[i],
+          position: index,
+        });// next round logic!!!
+        this.stateHeroMove = GameController.moveCharacter(this.humanTeam[i]);
         this.moveHero = GameController.cellsMove(this.stateHeroMove, index);
-        this.stateHeroAttack = GameController.attackCharacter(this.stateHero);
-        this.attackHero = GameController.cellsMove(this.stateHeroAttack, index);
+        this.stateHeroAttack = GameController.attackCharacter(this.humanTeam[i]);
+        this.attackHero = GameController.cellsAttack(this.stateHeroAttack, index);
       }
     }
     for (let i = 0; i < this.aiTeam.length; i += 1) {
@@ -169,6 +185,63 @@ export default class GameController {
   }
 
   static cellsMove(char, index) {
+    const arr = [];
+    const arrHor = [];
+    const arrSize = 8;
+    let numArr = 0;
+    for (let i = 0; i < 64; i += 1) {
+      arr.push(i);
+    }
+    for (let i = 0; i < arr.length; i += arrSize) {
+      arrHor.push(arr.slice(i, i + arrSize));
+    }
+    for (let i = 0; i < arrHor.length; i += 1) {
+      if (arrHor[i].includes(index)) numArr = i;
+    }
+    const horizont = 1;
+    const vertical = 8;
+    const move = [];
+    let moveHorR = index;
+    for (let i = 1; i < char; i += 1) {
+      moveHorR += horizont;
+      if (arrHor[numArr].includes(moveHorR)) move.push(moveHorR);
+    }
+    let moveHorL = index;
+    for (let i = 1; i < char; i += 1) {
+      moveHorL -= horizont;
+      if (arrHor[numArr].includes(moveHorL)) move.push(moveHorL);
+    }
+
+    let moveVertU = index;
+    for (let i = 1; i < char; i += 1) {
+      moveVertU += vertical;
+      if (arr.includes(moveVertU)) move.push(moveVertU);
+      let num = 0;
+      for (let j = 0; j < arrHor.length; j += 1) {
+        if (arrHor[j].includes(moveVertU)) num = j;
+      }
+      const diagU = moveVertU + horizont * i;
+      if (arrHor[num].includes(diagU)) move.push(diagU);
+      const diagD = moveVertU - horizont * i;
+      if (arrHor[num].includes(diagD)) move.push(diagD);
+    }
+    let moveVertD = index;
+    for (let i = 1; i < char; i += 1) {
+      moveVertD -= vertical;
+      if (arr.includes(moveVertD)) move.push(moveVertD);
+      let num = 0;
+      for (let j = 0; j < arrHor.length; j += 1) {
+        if (arrHor[j].includes(moveVertD)) num = j;
+      }
+      const diagU = moveVertD + horizont * i;
+      if (arrHor[num].includes(diagU)) move.push(diagU);
+      const diagD = moveVertD - horizont * i;
+      if (arrHor[num].includes(diagD)) move.push(diagD);
+    }
+    return move;
+  }
+
+  static cellsAttack(char, index) {
     const arr = [];
     const arrHor = [];
     const arrSize = 8;
