@@ -115,7 +115,7 @@ export default class GameController {
     }
     for (let i = 0; i < this.aiTeam.length; i += 1) {
       if (this.aiTeam[i].type === cellEnter.children[0].classList[1]) {
-        const health = cellEnter.children[0].children[0].children[0].style.width;
+        const health = cellEnter.querySelector('.health-level-indicator').style.width;
         message = `${medal} ${this.aiTeam[i].level} ${swords} ${this.aiTeam[i].attack} ${shield} ${this.aiTeam[i].defence} ${heart} ${health}`;
         if (this.stateHero && this.attackHero.includes(index)) {
           this.gamePlay.setCursor(cursors.crosshair);

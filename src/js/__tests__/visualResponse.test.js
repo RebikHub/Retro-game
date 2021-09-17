@@ -1,17 +1,28 @@
-import GameController from '../GameController';
+import GamePlay from '../GamePlay';
+import cursors from '../cursors';
 
-jest.mock('../Gameplay');
+jest.mock('../GamePlay');
 beforeEach(() => jest.resetAllMocks());
 
-test('should visual response cursors and cells', () => {
+test('should cursors -> pointer', () => {
   const gamePlay = new GamePlay();
-  const hero = new Bowerman(1);
-  const medal = '\u{1F396}';
-  const swords = '\u{2694}';
-  const shield = '\u{1F6E1}';
-  const heart = '\u{2764}';
-  const message = `${medal} ${hero.level} ${swords} ${hero.attack} ${shield} ${hero.defence} ${heart} ${hero.health}`;
-  gamePlay.showCellTooltip.mockReturnValue(message);
+  gamePlay.setCursor.mockReturnValue('pointer');
 
-  expect(gamePlay.showCellTooltip(message, 0)).toEqual('\u{1F396} 1 \u{2694} 25 \u{1F6E1} 25 \u{2764} 50');
+  expect(gamePlay.setCursor(cursors.pointer)).toEqual('pointer');
+});
+
+test('should cell -> green', () => {
+  const gamePlay = new GamePlay();
+  gamePlay.selectCell.mockReturnValue('green');
+
+  expect(gamePlay.selectCell(8, 'green')).toEqual('green');
+});
+
+test('should cell -> red, cursor -> crosshair', () => {
+  const gamePlay = new GamePlay();
+  gamePlay.setCursor.mockReturnValue('crosshair');
+  gamePlay.selectCell.mockReturnValue('red');
+
+  expect(gamePlay.setCursor(cursors.crosshair)).toEqual('crosshair');
+  expect(gamePlay.selectCell(8, 'red')).toEqual('red');
 });
