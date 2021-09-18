@@ -30,7 +30,7 @@ export default class GameController {
     this.stateHeroAttack = 0;
     this.moveHero = [];
     this.attackHero = [];
-    this.clickIndex = {};
+    this.damage = 0;
   }
 
   init() {
@@ -76,10 +76,10 @@ export default class GameController {
     }
   }
 
-  playMove(index, character) {
-    if (this.stateHero.character && this.moveHero.includes(index)) {
+  playMove(index, characterPosition) {
+    if (this.stateHero && this.moveHero.includes(index)) {
       for (let i = 0; i < this.startPosition.length; i += 1) {
-        if (character.position === this.startPosition[i].position) {
+        if (characterPosition === this.startPosition[i].position) {
           this.startPosition[i].position = index;
         }
       }
@@ -87,18 +87,29 @@ export default class GameController {
     }
   }
 
+  async playAttack(index, character, cell) {
+    if (['daemon', 'vampire', 'undead'].includes(cell.children[0].classList[1])) {
+      const target = {};
+      for (let i = 0; i < this.startPosition.length; i += 1) {
+        if (index === this.startPosition[i].position) {
+          this.startPosition[i].character = target;
+        }
+      }
+      // eslint-disable-next-line max-len
+      this.damage = Math.max(character.character.attack - target.defence, character.character.attack * 0.1);
+    }
+    await this.gamePlay.showDamage(index, this.damage);
+  }
+
   onCellClick(index) {
-    if (this.stateHero) this.playMove(index, this.stateHero);
+    if (this.stateHero) this.playMove(index, this.selectHero);
     const cellClick = this.gamePlay.cells[index];
     for (let i = 0; i < this.humanTeam.length; i += 1) {
       if (this.humanTeam[i].type === cellClick.children[0].classList[1]) {
         this.gamePlay.deselectCell(this.selectHero);
         this.selectHero = index;
         this.gamePlay.selectCell(index);
-        this.stateHero = GameState.from({
-          character: this.humanTeam[i],
-          position: index,
-        });// next round logic!!!
+        this.stateHero = this.humanTeam[i];// next round logic!!!
         this.stateHeroMove = GameController.moveCharacter(this.humanTeam[i]);
         this.moveHero = GameController.cellsMove(this.stateHeroMove, index);
         this.stateHeroAttack = GameController.attackCharacter(this.humanTeam[i]);
@@ -106,6 +117,10 @@ export default class GameController {
       }
     }
     for (let i = 0; i < this.aiTeam.length; i += 1) {
+      // eslint-disable-next-line max-len
+      // if (this.aiTeam[i].type === cellClick.children[0].classList[1] && this.humanTeam.includes(this.stateHero.character)) {
+      // this.gamePlay.showDamage(index, this.damage);
+      // }
       if (this.aiTeam[i].type === cellClick.children[0].classList[1]) {
         GamePlay.showError('Not you hero!!!');
       }
@@ -255,45 +270,42 @@ export default class GameController {
     for (let i = 0; i < arrHor.length; i += 1) {
       if (arrHor[i].includes(index)) numArr = i;
     }
+
     const horizont = 1;
     const vertical = 8;
     const move = [];
     let moveHorR = index;
     for (let i = 1; i < char; i += 1) {
       moveHorR += horizont;
-      if (arrHor[numArr].includes(moveHorR)) move.push(moveHorR);
+      if (arrHor[numArr].includes(moveHorR)) {
+        move.push(moveHorR);
+        for (let j = 1; j < char; j += 1) {
+          if (arr.includes(moveHorR + 8 * j)) move.push(moveHorR + 8 * j);
+          if (arr.includes(moveHorR - 8 * j)) move.push(moveHorR - 8 * j);
+        }
+      }
     }
     let moveHorL = index;
     for (let i = 1; i < char; i += 1) {
       moveHorL -= horizont;
-      if (arrHor[numArr].includes(moveHorL)) move.push(moveHorL);
+      if (arrHor[numArr].includes(moveHorL)) {
+        move.push(moveHorL);
+        for (let j = 1; j < char; j += 1) {
+          if (arr.includes(moveHorL + 8 * j)) move.push(moveHorL + 8 * j);
+          if (arr.includes(moveHorL - 8 * j)) move.push(moveHorL - 8 * j);
+        }
+      }
     }
 
     let moveVertU = index;
     for (let i = 1; i < char; i += 1) {
       moveVertU += vertical;
       if (arr.includes(moveVertU)) move.push(moveVertU);
-      let num = 0;
-      for (let j = 0; j < arrHor.length; j += 1) {
-        if (arrHor[j].includes(moveVertU)) num = j;
-      }
-      const diagU = moveVertU + horizont * i;
-      if (arrHor[num].includes(diagU)) move.push(diagU);
-      const diagD = moveVertU - horizont * i;
-      if (arrHor[num].includes(diagD)) move.push(diagD);
     }
     let moveVertD = index;
     for (let i = 1; i < char; i += 1) {
       moveVertD -= vertical;
       if (arr.includes(moveVertD)) move.push(moveVertD);
-      let num = 0;
-      for (let j = 0; j < arrHor.length; j += 1) {
-        if (arrHor[j].includes(moveVertD)) num = j;
-      }
-      const diagU = moveVertD + horizont * i;
-      if (arrHor[num].includes(diagU)) move.push(diagU);
-      const diagD = moveVertD - horizont * i;
-      if (arrHor[num].includes(diagD)) move.push(diagD);
     }
     return move;
   }
