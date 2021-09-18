@@ -24,7 +24,7 @@ export default class GameController {
     this.aiTeam = [];
     this.level = 1;
     this.charCount = 2;
-    this.selectHero = 1;
+    this.selectHero = 0;
     this.stateHero = {};
     this.stateHeroMove = 0;
     this.stateHeroAttack = 0;
@@ -89,21 +89,33 @@ export default class GameController {
 
   async playAttack(index, character, cell) {
     if (['daemon', 'vampire', 'undead'].includes(cell.children[0].classList[1])) {
-      const target = {};
       for (let i = 0; i < this.startPosition.length; i += 1) {
         if (index === this.startPosition[i].position) {
-          this.startPosition[i].character = target;
+          const target = this.startPosition[i].character;
+          let odd = 0;
+          if ((character.attack - target.defence) === 0) {
+            odd = 0.6;
+          } else if ((character.attack - target.defence) === (-15)) {
+            odd = 0.4;
+          } else if ((character.attack - target.defence) === (-30)) {
+            odd = 0.2;
+          }
+          this.damage = Math.max(character.attack - target.defence, character.attack * odd);
+          target.health -= this.damage;
+          cell.querySelector('.health-level-indicator').style.width = `${target.health}%`;
         }
       }
-      // eslint-disable-next-line max-len
-      this.damage = Math.max(character.character.attack - target.defence, character.character.attack * 0.1);
     }
     await this.gamePlay.showDamage(index, this.damage);
   }
 
   onCellClick(index) {
-    if (this.stateHero) this.playMove(index, this.selectHero);
     const cellClick = this.gamePlay.cells[index];
+    if (this.humanTeam.includes(this.stateHero) && !cellClick.children[0]) {
+      this.playMove(index, this.selectHero);
+    } else if (this.humanTeam.includes(this.stateHero) && ['daemon', 'vampire', 'undead'].includes(cellClick.children[0].classList[1]) && this.attackHero.includes(index)) {
+      this.playAttack(index, this.stateHero, cellClick);
+    }
     for (let i = 0; i < this.humanTeam.length; i += 1) {
       if (this.humanTeam[i].type === cellClick.children[0].classList[1]) {
         this.gamePlay.deselectCell(this.selectHero);
@@ -118,10 +130,7 @@ export default class GameController {
     }
     for (let i = 0; i < this.aiTeam.length; i += 1) {
       // eslint-disable-next-line max-len
-      // if (this.aiTeam[i].type === cellClick.children[0].classList[1] && this.humanTeam.includes(this.stateHero.character)) {
-      // this.gamePlay.showDamage(index, this.damage);
-      // }
-      if (this.aiTeam[i].type === cellClick.children[0].classList[1]) {
+      if (this.aiTeam[i].type === cellClick.children[0].classList[1] && !this.attackHero.includes(index)) {
         GamePlay.showError('Not you hero!!!');
       }
     }
@@ -148,10 +157,10 @@ export default class GameController {
       if (this.aiTeam[i].type === cellEnter.children[0].classList[1]) {
         const health = cellEnter.querySelector('.health-level-indicator').style.width;
         message = `${medal} ${this.aiTeam[i].level} ${swords} ${this.aiTeam[i].attack} ${shield} ${this.aiTeam[i].defence} ${heart} ${health}`;
-        if (this.stateHero && this.attackHero.includes(index)) {
+        if (this.humanTeam.includes(this.stateHero) && this.attackHero.includes(index)) {
           this.gamePlay.setCursor(cursors.crosshair);
           this.gamePlay.selectCell(index, 'red');
-        } else {
+        } else if (this.humanTeam.includes(this.stateHero) && !this.attackHero.includes(index)) {
           this.gamePlay.setCursor(cursors.notallowed);
         }
       }
