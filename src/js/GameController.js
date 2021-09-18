@@ -88,6 +88,7 @@ export default class GameController {
   }
 
   async playAttack(index, character, cell) {
+    const cellDom = cell;
     if (['daemon', 'vampire', 'undead'].includes(cell.children[0].classList[1])) {
       for (let i = 0; i < this.startPosition.length; i += 1) {
         if (index === this.startPosition[i].position) {
@@ -102,11 +103,24 @@ export default class GameController {
           }
           this.damage = Math.max(character.attack - target.defence, character.attack * odd);
           target.health -= this.damage;
-          cell.querySelector('.health-level-indicator').style.width = `${target.health}%`;
+          cellDom.querySelector('.health-level-indicator').style.width = `${target.health}%`;
+          if (target.health <= 0) {
+            this.characterDeath(target.type, this.startPosition, index);
+          }
         }
       }
     }
     await this.gamePlay.showDamage(index, this.damage);
+  }
+
+  characterDeath(character, statePosition, index) {
+    for (let i = 0; i < statePosition.length; i += 1) {
+      if (character === statePosition[i].character.type && statePosition[i].position === index) {
+        statePosition.splice(i, 1);
+      }
+    }
+    this.gamePlay.redrawPositions(statePosition);
+    this.gamePlay.setCursor(cursors.pointer);
   }
 
   onCellClick(index) {
