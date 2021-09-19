@@ -26,8 +26,6 @@ export default class GameController {
     this.charCount = 2;
     this.selectHero = 0;
     this.stateHero = {};
-    this.stateHeroMove = 0;
-    this.stateHeroAttack = 0;
     this.moveHero = [];
     this.attackHero = [];
     this.damage = 0;
@@ -37,22 +35,23 @@ export default class GameController {
     this.gamePlay.drawUi(themes.prairie);
     GameController.generateHeroes(this.aiHeroes, this.aiTeam, this.humanHeroes, this.humanTeam);
     // eslint-disable-next-line max-len
-    GameController.startPositionChar(this.humanTeam, this.startPositionHuman, this.aiTeam, this.startPositionAi, this.startPosition);
+    this.startPositionChar(this.humanTeam, this.startPositionHuman, this.aiTeam, this.startPositionAi);
     this.gamePlay.redrawPositions(this.startPosition);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
   }
 
-  static startPositionChar(humanTeam, posHuman, aiTeam, posAi, arr) {
+  startPositionChar(humanTeam, posHuman, aiTeam, posAi) {
     let comparePos;
+
     for (let i = 0; i < humanTeam.length; i += 1) {
       let humanPos = posHuman[Math.floor(Math.random() * posHuman.length)];
       while (comparePos === humanPos) {
         humanPos = posHuman[Math.floor(Math.random() * posHuman.length)];
       }
       comparePos = humanPos;
-      arr.push(new PositionedCharacter(humanTeam[i], humanPos));
+      this.startPosition.push(new PositionedCharacter(humanTeam[i], humanPos));
     }
     for (let i = 0; i < aiTeam.length; i += 1) {
       let aiPos = posAi[Math.floor(Math.random() * posAi.length)];
@@ -60,9 +59,8 @@ export default class GameController {
         aiPos = posAi[Math.floor(Math.random() * posAi.length)];
       }
       comparePos = aiPos;
-      arr.push(new PositionedCharacter(aiTeam[i], aiPos));
+      this.startPosition.push(new PositionedCharacter(aiTeam[i], aiPos));
     }
-    return arr;
   }
 
   static generateHeroes(aiHeroes, aiTeam, humanHeroes, humanTeam) {
@@ -113,6 +111,10 @@ export default class GameController {
     await this.gamePlay.showDamage(index, this.damage);
   }
 
+  async aiPlayAttack(index, character) {
+    await this.gamePlay.showDamage(index, this.damage);
+  }
+
   characterDeath(character, statePosition, index) {
     for (let i = 0; i < statePosition.length; i += 1) {
       if (character === statePosition[i].character.type && statePosition[i].position === index) {
@@ -136,10 +138,8 @@ export default class GameController {
         this.selectHero = index;
         this.gamePlay.selectCell(index);
         this.stateHero = this.humanTeam[i];// next round logic!!!
-        this.stateHeroMove = GameController.moveCharacter(this.humanTeam[i]);
-        this.moveHero = GameController.cellsMove(this.stateHeroMove, index);
-        this.stateHeroAttack = GameController.attackCharacter(this.humanTeam[i]);
-        this.attackHero = GameController.cellsAttack(this.stateHeroAttack, index);
+        this.moveHero = GameController.cellsMove(this.humanTeam[i], index);
+        this.attackHero = GameController.cellsAttack(this.humanTeam[i], index);
       }
     }
     for (let i = 0; i < this.aiTeam.length; i += 1) {
@@ -222,7 +222,8 @@ export default class GameController {
     return 'error not character!';
   }
 
-  static cellsMove(char, index) {
+  static cellsMove(character, index) {
+    const char = GameController.moveCharacter(character);
     const arr = [];
     const arrHor = [];
     const arrSize = 8;
@@ -279,7 +280,8 @@ export default class GameController {
     return move;
   }
 
-  static cellsAttack(char, index) {
+  static cellsAttack(character, index) {
+    const char = GameController.attackCharacter(character);
     const arr = [];
     const arrHor = [];
     const arrSize = 8;
