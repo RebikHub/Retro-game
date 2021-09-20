@@ -26,7 +26,6 @@ export default class GameController {
     this.charCount = 2;
     this.selectHero = 0;
     this.stateHero = {};
-    this.stateHeroNext = {};
     this.moveHero = [];
     this.attackHero = [];
     this.damage = 0;
@@ -42,7 +41,6 @@ export default class GameController {
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
-    // this.playTurn(this.startPosition);
   }
 
   startPositionChar(humanTeam, posHuman, aiTeam, posAi) {
@@ -116,46 +114,53 @@ export default class GameController {
     await this.gamePlay.showDamage(index, this.damage);
   }
 
-  async playAiAttack(statePosition) {
+  aiTurnLogic(statePosition) {
     let radiusAttack = [];
-    let character = {};
-    let index = 0;
-    console.log(statePosition);
-    for (const iter of statePosition) {
-      if (['daemon', 'vampire', 'undead'].includes(iter.character.type)) {
-        radiusAttack = GameController.cellsAttack(iter.character, iter.position);
-        character = iter.character;
-        console.log(radiusAttack);
-        for (let i = 0; i < radiusAttack.length; i += 1) {
-          // index = radiusAttack[i];
-          console.log(radiusAttack[i]);
-          console.log(this.gamePlay.cells[radiusAttack[i]]);
-          // if (['magician', 'swordsman', 'bowman'].includes(this.gamePlay.cells[index].children[0].classList[1])) {
-          //   // for (let j = 0; j < statePosition.length; j += 1) {
-          //   //   if (index === statePosition[j].position) {
-          //   //     const target = statePosition[j].character;
-          //   //     let odd = 0;
-          //   //     if ((character.attack - target.defence) === 0) {
-          //   //       odd = 0.6;
-          //   //     } else if ((character.attack - target.defence) === (-15)) {
-          //   //       odd = 0.4;
-          //   //     } else if ((character.attack - target.defence) === (-30)) {
-          //   //       odd = 0.2;
-          //   //     }
-          //   //     this.damage = Math.max(character.attack - target.defence, character.attack * odd);
-          //   //     target.health -= this.damage;
-          //   //     this.gamePlay.cells[index].querySelector('.health-level-indicator').style.width = `${target.health}%`;
-          //   //     if (target.health <= 0) {
-          //   //       this.characterDeath(target.type, this.startPosition, index);
-          //   //     }
-          //   //   }
-          //   // }
-          // }
+    const character = this.aiTeam[0];
+    for (const i of statePosition) {
+      if (i.character === character) {
+        radiusAttack = GameController.cellsAttack(character, i.position);
+      }
+      if (i.character === character) {
+        radiusAttack = GameController.cellsAttack(character, i.position);
+      }
+    }
+
+    radiusAttack.forEach((e) => {
+      if (this.gamePlay.cells[e].children.length > 0) {
+        this.playAiAttack(e, statePosition, character);
+      }
+    });
+  }
+
+  async playAiAttack(index, statePosition, character) {
+    let targetPosition = null;
+    if (['magician', 'swordsman', 'bowman'].includes(this.gamePlay.cells[index].children[0].classList[1])) {
+      for (let j = 0; j < statePosition.length; j += 1) {
+        if (index === statePosition[j].position) {
+          const target = statePosition[j].character;
+          targetPosition = index;
+          let odd = 0;
+          if ((character.attack - target.defence) === 0) {
+            odd = 0.6;
+          } else if ((character.attack - target.defence) === (-15)) {
+            odd = 0.4;
+          } else if ((character.attack - target.defence) === (-30)) {
+            odd = 0.2;
+          }
+          this.damage = Math.max(character.attack - target.defence, character.attack * odd);
+          target.health -= this.damage;
+          this.gamePlay.cells[index].querySelector('.health-level-indicator').style.width = `${target.health}%`;
+          if (target.health <= 0) {
+            this.characterDeath(target.type, this.startPosition, index);
+          }
         }
       }
     }
-    this.playTurn(index, this.startPosition);
-    await this.gamePlay.showDamage(index, this.damage);
+    if (this.damage !== 0 && targetPosition !== null) {
+      this.playTurn(targetPosition, this.startPosition);
+      await this.gamePlay.showDamage(targetPosition, this.damage);
+    }
   }
 
   playTurn(index, startPositions) {
@@ -165,25 +170,15 @@ export default class GameController {
         this.gameState.push(GameState.from({
           character: iter.character,
           position: iter.position,
-          attack: 0,
-          move: 0,
         }));
       } else {
         this.gameState.push(GameState.from({
           character: iter.character,
           position: iter.position,
-          attack: 1,
-          move: 1,
         }));
       }
     }
-    // for (const obj of this.gameState) {
-    //   if (['daemon', 'vampire', 'undead'].includes(obj.type)) this.playAiAttack(obj, this.gameState);
-    // }
-    // this.playAiAttack(character, this.gameState);
-    // console.log(this.damage);
-    // console.log(this.gameState);
-    // console.log(this.stateHero);
+    console.log(this.gameState);
   }
 
   characterDeath(character, statePosition, index) {
@@ -192,6 +187,9 @@ export default class GameController {
         statePosition.splice(i, 1);
       }
     }
+    this.gamePlay.deselectCell(this.selectHero);
+    this.selectHero = 0;
+    this.stateHero = {};
     this.gamePlay.redrawPositions(statePosition);
     this.gamePlay.setCursor(cursors.pointer);
     this.playTurn(index, statePosition);
@@ -201,10 +199,10 @@ export default class GameController {
     const cellClick = this.gamePlay.cells[index];
     if (this.humanTeam.includes(this.stateHero) && !cellClick.children[0]) {
       this.playMove(index, this.selectHero);
-      this.playAiAttack(this.gameState);
+      this.aiTurnLogic(this.gameState);
     } else if (this.humanTeam.includes(this.stateHero) && ['daemon', 'vampire', 'undead'].includes(cellClick.children[0].classList[1]) && this.attackHero.includes(index)) {
       this.playAttack(index, this.stateHero, cellClick);
-      this.playAiAttack(this.gameState);
+      this.aiTurnLogic(this.gameState);
     }
     for (let i = 0; i < this.humanTeam.length; i += 1) {
       if (this.humanTeam[i].type === cellClick.children[0].classList[1]) {
@@ -212,7 +210,6 @@ export default class GameController {
         this.selectHero = index;
         this.gamePlay.selectCell(index);
         this.stateHero = this.humanTeam[i];
-        this.stateHeroNext = this.aiTeam;// next round logic!!!
         this.moveHero = GameController.cellsMove(this.humanTeam[i], index);
         this.attackHero = GameController.cellsAttack(this.humanTeam[i], index);
       }
