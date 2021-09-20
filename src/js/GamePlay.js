@@ -205,7 +205,6 @@ export default class GamePlay {
   }
 
   showDamage(index, damage) {
-    console.log(index);
     return new Promise((resolve) => {
       const cell = this.cells[index];
       const damageEl = document.createElement('span');
