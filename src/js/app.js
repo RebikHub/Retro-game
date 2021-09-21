@@ -14,13 +14,3 @@ const gameCtrl = new GameController(gamePlay, stateService);
 gameCtrl.init();
 
 // don't write your code here
-import Swordsman from './classes/swordsman';
-import Bowerman from './classes/bowerman';
-import Magician from './classes/magician';
-import Daemon from './classes/daemon';
-import Vampire from './classes/vampire';
-import Undead from './classes/undead';
-import { characterGenerator, generateTeam } from './generators';
-
-
-// console.log(gamePlay.cells[25]);

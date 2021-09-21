@@ -82,8 +82,9 @@ export default class GameController {
           this.startPosition[i].position = index;
         }
       }
-      this.gamePlay.redrawPositions(this.startPosition);
+      // this.gamePlay.deselectCell(index);
       this.playTurn(index, this.startPosition);
+      this.gamePlay.redrawPositions(this.startPosition);
     }
   }
 
@@ -109,12 +110,14 @@ export default class GameController {
           }
         }
       }
-      this.playTurn(index, this.startPosition);
     }
+    // this.gamePlay.deselectCell(index);
+    this.playTurn(index, this.startPosition);
     await this.gamePlay.showDamage(index, this.damage);
   }
 
   playTurn(index, startPosition) {
+    this.gamePlay.deselectCell(index);
     this.gameState = [];
     this.aiTeam = [];
     this.humanTeam = [];
@@ -134,29 +137,24 @@ export default class GameController {
         this.humanTeam.push(iter.character);
       }
     }
-    for (let i = 0; i < this.aiTeam.length; i += 1) {
-      if (this.aiTeam[i].type === this.gamePlay.cells[index].children[0].classList[1]) {
-        this.gamePlay.deselectCell(this.selectHero);
-        this.selectHero = index;
-        this.gamePlay.selectCell(index);
-        this.stateHero = this.aiTeam[i];
-        this.moveHero = GameController.cellsMove(this.aiTeam[i], index);
-        this.attackHero = GameController.cellsAttack(this.aiTeam[i], index);
-      }
-    }
     const randAi = Math.floor(Math.random() * this.aiTeam.length);
-    this.aiTurnLogic(this.gameState, this.aiTeam[randAi], this.aiTeam[randAi].position);
+    this.gamePlay.selectCell(this.aiTeam[randAi].position);
+
+    this.aiTurnLogic(this.aiTeam[randAi], this.aiTeam[randAi].position);
   }
 
-  aiTurnLogic(statePosition, char, charPos) {
+  aiTurnLogic(char, charPos) {
     const radiusAttack = GameController.cellsAttack(char, charPos);
-    radiusAttack.forEach((e) => {
-      if (['magician', 'swordsman', 'bowman'].includes(this.gamePlay.cells[e].children[0].classList[1])) {
-        this.playAiAttack(e, statePosition, char);
+    for (let i = 0; i < radiusAttack.length; i += 1) {
+       let index = radiusAttack[i];
+      if (this.gamePlay.cells[index].children[0]) {
+        if (['magician', 'swordsman', 'bowman'].includes(this.gamePlay.cells[index].children[0].classList[1])) {
+        this.playAiAttack(index, this.startPosition, char);
       } else {
         this.playAiMove(char, charPos);
       }
-    });
+      };
+    }
   }
 
   playAiMove(char, charPos) {
@@ -174,7 +172,7 @@ export default class GameController {
 
   async playAiAttack(index, statePosition, character) {
     let targetPosition = null;
-    if (['magician', 'swordsman', 'bowman'].includes(this.gamePlay.cells[index].children[0].classList[1])) {
+
       for (let j = 0; j < statePosition.length; j += 1) {
         if (index === statePosition[j].position) {
           const target = statePosition[j].character;
@@ -195,7 +193,7 @@ export default class GameController {
           }
         }
       }
-    }
+
     if (targetPosition !== null) {
       await this.gamePlay.showDamage(targetPosition, this.damage);
     }
@@ -212,17 +210,15 @@ export default class GameController {
     this.stateHero = {};
     this.gamePlay.redrawPositions(statePosition);
     this.gamePlay.setCursor(cursors.pointer);
-    this.playTurn(statePosition);
+    // this.playTurn(statePosition);
   }
 
   onCellClick(index) {
     const cellClick = this.gamePlay.cells[index];
     if (this.humanTeam.includes(this.stateHero) && !cellClick.children[0]) {
       this.playMove(index, this.selectHero);
-      // this.playTurn(this.startPosition);
     } else if (this.humanTeam.includes(this.stateHero) && ['daemon', 'vampire', 'undead'].includes(cellClick.children[0].classList[1]) && this.attackHero.includes(index)) {
       this.playAttack(index, this.stateHero, cellClick);
-      // this.playTurn(this.startPosition);
     }
     for (let i = 0; i < this.humanTeam.length; i += 1) {
       if (this.humanTeam[i].type === cellClick.children[0].classList[1]) {
@@ -237,14 +233,18 @@ export default class GameController {
     if (['daemon', 'vampire', 'undead'].includes(cellClick.children[0].classList[1]) && !this.attackHero.includes(index)) {
       GamePlay.showError('Not you hero!!!');
     }
-    // this.playTurn(this.startPosition);
   }
 
   onCellEnter(index) {
+    console.log(this.stateHero);
+    console.log(this.selectHero);
+    const cellEnter = this.gamePlay.cells[index];
     if (this.moveHero.includes(index) && this.selectHero !== 0) {
       this.gamePlay.selectCell(index, 'green');
     }
-    const cellEnter = this.gamePlay.cells[index];
+    if (cellEnter.title && !cellEnter.children[0]) {
+      this.gamePlay.hideCellTooltip(index);
+    }
     const medal = '\u{1F396}';
     const swords = '\u{2694}';
     const shield = '\u{1F6E1}';
@@ -284,9 +284,6 @@ export default class GameController {
         this.gamePlay.deselectCell(index, 'red');
         this.gamePlay.setCursor(cursors.pointer);
       }
-    }
-    if (cellLeave.children[0]) {
-      this.gamePlay.hideCellToolTip(index);
     }
   }
 
