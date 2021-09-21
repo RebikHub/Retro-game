@@ -35,7 +35,6 @@ export default class GameController {
   init() {
     this.gamePlay.drawUi(themes.prairie);
     GameController.generateHeroes(this.aiHeroes, this.aiTeam, this.humanHeroes, this.humanTeam);
-    // eslint-disable-next-line max-len
     this.startPositionChar(this.humanTeam, this.startPositionHuman, this.aiTeam, this.startPositionAi);
     this.gamePlay.redrawPositions(this.startPosition);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
@@ -82,7 +81,6 @@ export default class GameController {
           this.startPosition[i].position = index;
         }
       }
-      // this.gamePlay.deselectCell(index);
       this.playTurn(index, this.startPosition);
       this.gamePlay.redrawPositions(this.startPosition);
     }
@@ -111,13 +109,11 @@ export default class GameController {
         }
       }
     }
-    // this.gamePlay.deselectCell(index);
     this.playTurn(index, this.startPosition);
     await this.gamePlay.showDamage(index, this.damage);
   }
 
   playTurn(index, startPosition) {
-    this.gamePlay.deselectCell(index);
     this.gameState = [];
     this.aiTeam = [];
     this.humanTeam = [];
@@ -138,22 +134,21 @@ export default class GameController {
       }
     }
     const randAi = Math.floor(Math.random() * this.aiTeam.length);
-    this.gamePlay.selectCell(this.aiTeam[randAi].position);
-
     this.aiTurnLogic(this.aiTeam[randAi], this.aiTeam[randAi].position);
   }
 
   aiTurnLogic(char, charPos) {
     const radiusAttack = GameController.cellsAttack(char, charPos);
+    let index = null;
     for (let i = 0; i < radiusAttack.length; i += 1) {
-       let index = radiusAttack[i];
-      if (this.gamePlay.cells[index].children[0]) {
-        if (['magician', 'swordsman', 'bowman'].includes(this.gamePlay.cells[index].children[0].classList[1])) {
-        this.playAiAttack(index, this.startPosition, char);
-      } else {
-        this.playAiMove(char, charPos);
+      if (this.gamePlay.cells[radiusAttack[i]].children[0] && ['magician', 'swordsman', 'bowman'].includes(this.gamePlay.cells[radiusAttack[i]].children[0].classList[1])) {
+        index = radiusAttack[i];
       }
-      };
+    }
+    if (index !== null) {
+      this.playAiAttack(index, this.startPosition, char);
+    } else {
+      this.playAiMove(char, charPos);
     }
   }
 
@@ -193,10 +188,7 @@ export default class GameController {
           }
         }
       }
-
-    if (targetPosition !== null) {
-      await this.gamePlay.showDamage(targetPosition, this.damage);
-    }
+    await this.gamePlay.showDamage(targetPosition, this.damage);
   }
 
   characterDeath(character, statePosition, index) {
@@ -210,7 +202,6 @@ export default class GameController {
     this.stateHero = {};
     this.gamePlay.redrawPositions(statePosition);
     this.gamePlay.setCursor(cursors.pointer);
-    // this.playTurn(statePosition);
   }
 
   onCellClick(index) {
@@ -236,8 +227,6 @@ export default class GameController {
   }
 
   onCellEnter(index) {
-    console.log(this.stateHero);
-    console.log(this.selectHero);
     const cellEnter = this.gamePlay.cells[index];
     if (this.moveHero.includes(index) && this.selectHero !== 0) {
       this.gamePlay.selectCell(index, 'green');
@@ -250,14 +239,15 @@ export default class GameController {
     const shield = '\u{1F6E1}';
     const heart = '\u{2764}';
     let message = '';
-    for (let i = 0; i < this.humanTeam.length; i += 1) {
+    if (cellEnter.children[0]) {
+      for (let i = 0; i < this.humanTeam.length; i += 1) {
       if (this.humanTeam[i].type === cellEnter.children[0].classList[1]) {
         const health = cellEnter.querySelector('.health-level-indicator').style.width;
         message = `${medal} ${this.humanTeam[i].level} ${swords} ${this.humanTeam[i].attack} ${shield} ${this.humanTeam[i].defence} ${heart} ${health}`;
         this.gamePlay.setCursor(cursors.pointer);
       }
-    }
-    for (let i = 0; i < this.aiTeam.length; i += 1) {
+      }
+      for (let i = 0; i < this.aiTeam.length; i += 1) {
       if (this.aiTeam[i].type === cellEnter.children[0].classList[1]) {
         const health = cellEnter.querySelector('.health-level-indicator').style.width;
         message = `${medal} ${this.aiTeam[i].level} ${swords} ${this.aiTeam[i].attack} ${shield} ${this.aiTeam[i].defence} ${heart} ${health}`;
@@ -267,6 +257,7 @@ export default class GameController {
         } else if (this.humanTeam.includes(this.stateHero) && !this.attackHero.includes(index)) {
           this.gamePlay.setCursor(cursors.notallowed);
         }
+      }
       }
     }
     if (cellEnter.children[0]) {
@@ -279,10 +270,12 @@ export default class GameController {
     if (index !== this.selectHero) {
       this.gamePlay.deselectCell(index);
     }
-    for (let i = 0; i < this.aiTeam.length; i += 1) {
+    if (cellLeave.children[0]) {
+      for (let i = 0; i < this.aiTeam.length; i += 1) {
       if (this.aiTeam[i].type === cellLeave.children[0].classList[1]) {
         this.gamePlay.deselectCell(index, 'red');
         this.gamePlay.setCursor(cursors.pointer);
+      }
       }
     }
   }
