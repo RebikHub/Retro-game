@@ -9,6 +9,7 @@ import Undead from './classes/undead';
 import PositionedCharacter from './PositionedCharacter';
 import GamePlay from './GamePlay';
 import GameState from './GameState';
+import GameStateService from './GameStateService';
 import cursors from './cursors';
 
 export default class GameController {
@@ -30,12 +31,12 @@ export default class GameController {
     this.humDamage = null;
     this.aiDamage = null;
     this.gameState = [];
-    this.theme = '';
+    this.theme = themes.prairie;
     this.points = 0;
   }
 
   init() {
-    this.gamePlay.drawUi(themes.prairie);
+    this.gamePlay.drawUi(this.theme);
     this.generateHumHeroes(this.humanHeroes, this.charCount);
     this.generateAiHeroes(this.aiHeroes, this.charCount);
     this.startPositionChar(this.humanTeam, this.aiTeam);
@@ -46,7 +47,7 @@ export default class GameController {
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
     this.gamePlay.addNewGameListener(this.onNewGameClick.bind(this));
     this.gamePlay.addSaveGameListener(this.onSaveGameClick.bind(this));
-    // this.gamePlay.addLoadGameListener(this.onLoadGameClick.bind(this));
+    this.gamePlay.addLoadGameListener(this.onLoadGameClick.bind(this));
   }
 
   startPositionChar(humanTeam, aiTeam) {
@@ -230,6 +231,7 @@ export default class GameController {
     this.getGameState(this.startPosition);
     this.gamePlay.setCursor(cursors.auto);
     if (this.aiTeam.length === 0) {
+      console.log(this.humanTeam);
       this.humanTeam.forEach((elem) => {
         this.points += elem.health;
         elem.levelUp();
@@ -270,7 +272,6 @@ export default class GameController {
 
   onCellClick(index) {
     const cellClick = this.gamePlay.cells[index];
-    // this.onNewGameClick(cellClick);
     if (this.humanTeam.includes(this.stateHero) && !cellClick.children[0]) {
       this.playMove(index, this.selectHero);
     } else if (this.humanTeam.includes(this.stateHero) && ['daemon', 'vampire', 'undead'].includes(cellClick.children[0].classList[1]) && this.attackHero.includes(index)) {
@@ -353,13 +354,30 @@ export default class GameController {
   }
 
   onSaveGameClick() {
-    const save = this.gameState;
-    localStorage.set(save, 'save');
+    const { startPosition } = this;
+    const { points } = this;
+    const { theme } = this;
+    const { selectHero } = this;
+    const { stateHero } = this;
+    const gameState = {
+      startPosition,
+      points,
+      theme,
+      selectHero,
+      stateHero,
+    };
+    GameState.from(gameState);
+    localStorage.clear();
+    this.stateService.save(GameState.from(gameState));
   }
 
-  // onLoadGameClick() {
-
-  // }
+  onLoadGameClick() {
+    const loadGame = this.stateService.load();
+    this.startPosition = loadGame.startPosition;
+    this.gamePlay.drawUi(loadGame.theme);
+    this.gamePlay.redrawPositions(loadGame.startPosition);
+    this.getGameState(this.startPosition);
+  }
 
   static moveCharacter(character) {
     if (character.type === 'bowman' || character.type === 'vampire') {
