@@ -22,7 +22,6 @@ export default class GameController {
     this.startPosition = [];
     this.humanTeam = [];
     this.aiTeam = [];
-    this.level = 1;
     this.charCount = 2;
     this.selectHero = 0;
     this.stateHero = {};
@@ -36,46 +35,53 @@ export default class GameController {
 
   init() {
     this.gamePlay.drawUi(themes.prairie);
-    this.generateHumHeroes(this.humanHeroes, this.level, this.charCount);
-    this.generateAiHeroes(this.aiHeroes, this.level, this.charCount);
-    this.startPositionChar(this.humanTeam, this.startPosHum, this.aiTeam, this.startPosAi);
+    this.generateHumHeroes(this.humanHeroes, this.charCount);
+    this.generateAiHeroes(this.aiHeroes, this.charCount);
+    this.startPositionChar(this.humanTeam, this.aiTeam);
     this.gamePlay.redrawPositions(this.startPosition);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
   }
 
-  startPositionChar(humanTeam, posHuman, aiTeam, posAi) {
-    let comparePos;
+  startPositionChar(humanTeam, aiTeam) {
+    const humStart = [];
+    const aiStart = [];
 
     for (let i = 0; i < humanTeam.length; i += 1) {
-      let humanPos = posHuman[Math.floor(Math.random() * posHuman.length)];
-      while (comparePos === humanPos) {
-        humanPos = posHuman[Math.floor(Math.random() * posHuman.length)];
+      let humanPos = this.startPosHum[Math.floor(Math.random() * this.startPosHum.length)];
+      while (humStart.includes(humanPos)) {
+        humanPos = this.startPosHum[Math.floor(Math.random() * this.startPosHum.length)];
       }
-      comparePos = humanPos;
+      humStart.push(humanPos);
       this.startPosition.push(new PositionedCharacter(humanTeam[i], humanPos));
     }
     for (let i = 0; i < aiTeam.length; i += 1) {
-      let aiPos = posAi[Math.floor(Math.random() * posAi.length)];
-      while (comparePos === aiPos) {
-        aiPos = posAi[Math.floor(Math.random() * posAi.length)];
+      let aiPos = this.startPosAi[Math.floor(Math.random() * this.startPosAi.length)];
+      while (aiStart.includes(aiPos)) {
+        aiPos = this.startPosAi[Math.floor(Math.random() * this.startPosAi.length)];
       }
-      comparePos = aiPos;
+      aiStart.push(aiPos);
       this.startPosition.push(new PositionedCharacter(aiTeam[i], aiPos));
     }
   }
 
-  generateHumHeroes(humanHeroes, level, charCount) {
-    const humanChar = generateTeam(humanHeroes, level, charCount);
+  generateHumHeroes(humanHeroes, charCount, level) {
+    const humanChar = generateTeam(humanHeroes, charCount);
     for (let i = 0; i < humanChar.length; i += 1) {
+      for (let j = 1; j <= level; j += 1) {
+        humanChar[i].levelUp();
+      }
       this.humanTeam.push(humanChar[i]);
     }
   }
 
-  generateAiHeroes(aiHeroes, level, charCount) {
-    const aiChar = generateTeam(aiHeroes, level, charCount);
+  generateAiHeroes(aiHeroes, charCount, level) {
+    const aiChar = generateTeam(aiHeroes, charCount);
     for (let i = 0; i < aiChar.length; i += 1) {
+      for (let j = 1; j < level; j += 1) {
+        aiChar[i].levelUp();
+      }
       this.aiTeam.push(aiChar[i]);
     }
   }
@@ -87,8 +93,8 @@ export default class GameController {
           this.startPosition[i].position = index;
         }
       }
-      this.playTurn(index, this.startPosition);
       this.gamePlay.redrawPositions(this.startPosition);
+      this.playTurn(index, this.startPosition);
     }
   }
 
@@ -107,7 +113,7 @@ export default class GameController {
           } else if (diff <= (-30)) {
             odd = 0.2;
           }
-          this.humDamage = Math.max(diff, character.attack * odd);
+          this.humDamage = +(Math.max(diff, character.attack * odd)).toFixed();
           target.health -= this.humDamage;
           cellDom.querySelector('.health-level-indicator').style.width = `${target.health}%`;
           if (target.health <= 0) {
@@ -192,7 +198,7 @@ export default class GameController {
         } else if (diff <= (-30)) {
           odd = 0.2;
         }
-        this.aiDamage = Math.max(diff, character.attack * odd);
+        this.aiDamage = +(Math.max(diff, character.attack * odd)).toFixed();
         target.health -= this.aiDamage;
         this.gamePlay.cells[index].querySelector('.health-level-indicator').style.width = `${target.health}%`;
         if (target.health <= 0) {
@@ -216,39 +222,41 @@ export default class GameController {
     this.gamePlay.redrawPositions(statePosition);
     this.gamePlay.setCursor(cursors.pointer);
     if (this.aiTeam.length === 0) {
-      this.nextLevel();
+      this.humanTeam.forEach((elem) => {
+        elem.levelUp();
+      });
+      throw this.nextLevel();
     } else if (this.humanTeam.length === 0) {
-      GamePlay.showMessage('Game Over');
+      throw GamePlay.showMessage('Game Over');
     }
   }
 
   nextLevel() {
     this.startPosition = [];
-    this.selectHero = 0;
-    this.stateHero = {};
-    for (const iter of this.humanTeam) {
-      iter.levelUp();
-    }
     if (document.querySelector('.prairie') !== null) {
       this.theme = themes.desert;
-      this.generateHumHeroes(this.humanHeroes, 1, 1);
+      this.generateHumHeroes(this.humanHeroes, 1);
     } else if (document.querySelector('.desert') !== null) {
       this.theme = themes.arctic;
-      this.generateHumHeroes(this.humanHeroes, Math.floor(Math.random() * [1, 2].length), 1);
-      this.generateHumHeroes(this.humanHeroes, Math.floor(Math.random() * [1, 2].length), 1);
+      for (let i = 0; i < 2; i += 1) {
+        this.generateHumHeroes(this.humanHeroes, 1, Math.max(1, Math.round(Math.random() * 2)));
+      }
     } else if (document.querySelector('.arctic') !== null) {
       this.theme = themes.mountain;
-      this.generateHumHeroes(this.humanHeroes, Math.floor(Math.random() * [1, 2, 3].length), 1);
-      this.generateHumHeroes(this.humanHeroes, Math.floor(Math.random() * [1, 2, 3].length), 1);
+      for (let i = 0; i < 2; i += 1) {
+        this.generateHumHeroes(this.humanHeroes, 1, Math.max(1, Math.round(Math.random() * 3)));
+      }
     } else if (document.querySelector('.mountain') !== null) {
       GamePlay.showMessage('Congratulation! You Win!');
+      this.startPosition = [];
     }
     this.gamePlay.drawUi(this.theme);
-    for (const char of this.humanTeam) {
-      this.generateAiHeroes(this.aiHeroes, char.level, 1);
+    for (let i = 0; i < this.humanTeam.length; i += 1) {
+      this.generateAiHeroes(this.aiHeroes, 1, this.humanTeam[i].level);
     }
-    this.startPositionChar(this.humanTeam, this.startPosHum, this.aiTeam, this.startPosAi);
+    this.startPositionChar(this.humanTeam, this.aiTeam);
     this.gamePlay.redrawPositions(this.startPosition);
+    this.getGameState(this.startPosition);
   }
 
   onCellClick(index) {
@@ -316,6 +324,7 @@ export default class GameController {
     const cellLeave = this.gamePlay.cells[index];
     if (index !== this.selectHero) {
       this.gamePlay.deselectCell(index);
+      this.gamePlay.setCursor(cursors.pointer);
     }
     if (cellLeave.children[0]) {
       for (let i = 0; i < this.aiTeam.length; i += 1) {
