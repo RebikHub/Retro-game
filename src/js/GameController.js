@@ -23,12 +23,12 @@ export default class GameController {
     this.humanTeam = [];
     this.aiTeam = [];
     this.charCount = 2;
-    this.selectHero = 0;
+    this.selectHero = null;
     this.stateHero = {};
     this.moveHero = [];
     this.attackHero = [];
-    this.humDamage = 0;
-    this.aiDamage = 0;
+    this.humDamage = null;
+    this.aiDamage = null;
     this.gameState = [];
     this.theme = '';
   }
@@ -39,6 +39,7 @@ export default class GameController {
     this.generateAiHeroes(this.aiHeroes, this.charCount);
     this.startPositionChar(this.humanTeam, this.aiTeam);
     this.gamePlay.redrawPositions(this.startPosition);
+    this.getGameState(this.startPosition);
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
@@ -69,7 +70,7 @@ export default class GameController {
   generateHumHeroes(humanHeroes, charCount, level) {
     const humanChar = generateTeam(humanHeroes, charCount);
     for (let i = 0; i < humanChar.length; i += 1) {
-      for (let j = 1; j <= level; j += 1) {
+      for (let j = 1; j < level; j += 1) {
         humanChar[i].levelUp();
       }
       this.humanTeam.push(humanChar[i]);
@@ -94,6 +95,7 @@ export default class GameController {
         }
       }
       this.gamePlay.redrawPositions(this.startPosition);
+      this.getGameState(this.startPosition);
       this.playTurn(index, this.startPosition);
     }
   }
@@ -143,6 +145,7 @@ export default class GameController {
           character: iter.character,
           position: iter.position,
         }));
+        iter.character.position = iter.position;
         this.humanTeam.push(iter.character);
       }
     }
@@ -180,6 +183,7 @@ export default class GameController {
       }
     }
     this.gamePlay.redrawPositions(this.startPosition);
+    this.getGameState(this.startPosition);
   }
 
   async playAiAttack(index, statePosition, character) {
@@ -215,12 +219,12 @@ export default class GameController {
         statePosition.splice(i, 1);
       }
     }
-    this.getGameState(statePosition);
     this.gamePlay.deselectCell(this.selectHero);
     this.selectHero = 0;
     this.stateHero = {};
     this.gamePlay.redrawPositions(statePosition);
-    this.gamePlay.setCursor(cursors.pointer);
+    this.getGameState(this.startPosition);
+    this.gamePlay.setCursor(cursors.auto);
     if (this.aiTeam.length === 0) {
       this.humanTeam.forEach((elem) => {
         elem.levelUp();
@@ -268,7 +272,7 @@ export default class GameController {
     }
     for (let i = 0; i < this.humanTeam.length; i += 1) {
       if (this.humanTeam[i].type === cellClick.children[0].classList[1]) {
-        this.gamePlay.deselectCell(this.selectHero);
+        if (this.selectHero !== null) this.gamePlay.deselectCell(this.selectHero);
         this.selectHero = index;
         this.gamePlay.selectCell(index);
         this.stateHero = this.humanTeam[i];
@@ -296,20 +300,20 @@ export default class GameController {
     let message = '';
     if (cellEnter.children[0]) {
       for (let i = 0; i < this.humanTeam.length; i += 1) {
-        if (this.humanTeam[i].type === cellEnter.children[0].classList[1]) {
+        if (this.humanTeam[i].position === index) {
+          this.gamePlay.setCursor(cursors.pointer);
           const health = cellEnter.querySelector('.health-level-indicator').style.width;
           message = `${medal} ${this.humanTeam[i].level} ${swords} ${this.humanTeam[i].attack} ${shield} ${this.humanTeam[i].defence} ${heart} ${health}`;
-          this.gamePlay.setCursor(cursors.pointer);
         }
       }
       for (let i = 0; i < this.aiTeam.length; i += 1) {
-        if (this.aiTeam[i].type === cellEnter.children[0].classList[1]) {
+        if (this.aiTeam[i].position === index) {
           const health = cellEnter.querySelector('.health-level-indicator').style.width;
           message = `${medal} ${this.aiTeam[i].level} ${swords} ${this.aiTeam[i].attack} ${shield} ${this.aiTeam[i].defence} ${heart} ${health}`;
           if (this.humanTeam.includes(this.stateHero) && this.attackHero.includes(index)) {
             this.gamePlay.setCursor(cursors.crosshair);
             this.gamePlay.selectCell(index, 'red');
-          } else if (this.humanTeam.includes(this.stateHero) && !this.attackHero.includes(index)) {
+          } else {
             this.gamePlay.setCursor(cursors.notallowed);
           }
         }
@@ -324,13 +328,12 @@ export default class GameController {
     const cellLeave = this.gamePlay.cells[index];
     if (index !== this.selectHero) {
       this.gamePlay.deselectCell(index);
-      this.gamePlay.setCursor(cursors.pointer);
     }
     if (cellLeave.children[0]) {
+      this.gamePlay.setCursor(cursors.auto);
       for (let i = 0; i < this.aiTeam.length; i += 1) {
         if (this.aiTeam[i].type === cellLeave.children[0].classList[1]) {
           this.gamePlay.deselectCell(index, 'red');
-          this.gamePlay.setCursor(cursors.pointer);
         }
       }
     }
