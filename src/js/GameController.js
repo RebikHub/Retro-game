@@ -9,7 +9,6 @@ import Undead from './classes/undead';
 import PositionedCharacter from './PositionedCharacter';
 import GamePlay from './GamePlay';
 import GameState from './GameState';
-import GameStateService from './GameStateService';
 import cursors from './cursors';
 
 export default class GameController {
@@ -231,7 +230,6 @@ export default class GameController {
     this.getGameState(this.startPosition);
     this.gamePlay.setCursor(cursors.auto);
     if (this.aiTeam.length === 0) {
-      console.log(this.humanTeam);
       this.humanTeam.forEach((elem) => {
         this.points += elem.health;
         elem.levelUp();
@@ -278,7 +276,7 @@ export default class GameController {
       this.playAttack(index, this.stateHero, cellClick);
     }
     for (let i = 0; i < this.humanTeam.length; i += 1) {
-      if (this.humanTeam[i].type === cellClick.children[0].classList[1]) {
+      if (this.humanTeam[i].position === index) {
         if (this.selectHero !== null) this.gamePlay.deselectCell(this.selectHero);
         this.selectHero = index;
         this.gamePlay.selectCell(index);
@@ -350,6 +348,7 @@ export default class GameController {
     this.startPosition = [];
     this.humanTeam = [];
     this.aiTeam = [];
+    this.theme = themes.prairie;
     this.init();
   }
 
@@ -373,6 +372,11 @@ export default class GameController {
 
   onLoadGameClick() {
     const loadGame = this.stateService.load();
+    const b = new Bowerman();
+    loadGame.startPosition.forEach((elem) => {
+      const obj = elem.character;
+      obj.levelUp = b.levelUp.bind(obj);
+    });
     this.startPosition = loadGame.startPosition;
     this.gamePlay.drawUi(loadGame.theme);
     this.gamePlay.redrawPositions(loadGame.startPosition);
