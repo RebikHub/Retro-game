@@ -13,8 +13,8 @@ export default class Character {
   levelUp() {
     this.level += 1;
     const ratio = 1.8 - (100 - this.health) / 100;
-    this.attack = Math.max(this.attack, this.attack * ratio);
-    this.defence = Math.max(this.defence, this.defence * ratio);
+    this.attack = (Math.max(this.attack, this.attack * ratio)).toFixed(1);
+    this.defence = (Math.max(this.defence, this.defence * ratio)).toFixed(1);
     if (this.health > 0) {
       this.health += 80;
       if (this.health > 100) this.health = 100;
