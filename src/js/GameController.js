@@ -31,6 +31,7 @@ export default class GameController {
     this.aiDamage = null;
     this.gameState = [];
     this.theme = '';
+    this.points = 0;
   }
 
   init() {
@@ -43,6 +44,9 @@ export default class GameController {
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
+    this.gamePlay.addNewGameListener(this.onNewGameClick.bind(this));
+    this.gamePlay.addSaveGameListener(this.onSaveGameClick.bind(this));
+    // this.gamePlay.addLoadGameListener(this.onLoadGameClick.bind(this));
   }
 
   startPositionChar(humanTeam, aiTeam) {
@@ -227,6 +231,7 @@ export default class GameController {
     this.gamePlay.setCursor(cursors.auto);
     if (this.aiTeam.length === 0) {
       this.humanTeam.forEach((elem) => {
+        this.points += elem.health;
         elem.levelUp();
       });
       throw this.nextLevel();
@@ -251,8 +256,8 @@ export default class GameController {
         this.generateHumHeroes(this.humanHeroes, 1, Math.max(1, Math.round(Math.random() * 3)));
       }
     } else if (document.querySelector('.mountain') !== null) {
-      GamePlay.showMessage('Congratulation! You Win!');
-      this.startPosition = [];
+      this.gamePlay.redrawPositions([]);
+      throw GamePlay.showMessage('Congratulation! You Win!');
     }
     this.gamePlay.drawUi(this.theme);
     for (let i = 0; i < this.humanTeam.length; i += 1) {
@@ -265,6 +270,7 @@ export default class GameController {
 
   onCellClick(index) {
     const cellClick = this.gamePlay.cells[index];
+    // this.onNewGameClick(cellClick);
     if (this.humanTeam.includes(this.stateHero) && !cellClick.children[0]) {
       this.playMove(index, this.selectHero);
     } else if (this.humanTeam.includes(this.stateHero) && ['daemon', 'vampire', 'undead'].includes(cellClick.children[0].classList[1]) && this.attackHero.includes(index)) {
@@ -338,6 +344,22 @@ export default class GameController {
       }
     }
   }
+
+  onNewGameClick() {
+    this.startPosition = [];
+    this.humanTeam = [];
+    this.aiTeam = [];
+    this.init();
+  }
+
+  onSaveGameClick() {
+    const save = this.gameState;
+    localStorage.set(save, 'save');
+  }
+
+  // onLoadGameClick() {
+
+  // }
 
   static moveCharacter(character) {
     if (character.type === 'bowman' || character.type === 'vampire') {
