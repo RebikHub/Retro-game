@@ -186,6 +186,7 @@ export default class GameController {
         }
       }
     }
+    this.gamePlay.setCursor(cursors.auto);
     this.gamePlay.redrawPositions(this.startPosition);
     this.getGameState(this.startPosition);
   }
@@ -224,11 +225,11 @@ export default class GameController {
       }
     }
     this.gamePlay.deselectCell(this.selectHero);
-    this.selectHero = 0;
+    this.selectHero = null;
     this.stateHero = {};
+    this.gamePlay.setCursor(cursors.auto);
     this.gamePlay.redrawPositions(statePosition);
     this.getGameState(this.startPosition);
-    this.gamePlay.setCursor(cursors.auto);
     if (this.aiTeam.length === 0) {
       this.humanTeam.forEach((elem) => {
         this.points += elem.health;
@@ -286,13 +287,13 @@ export default class GameController {
       }
     }
     if (['daemon', 'vampire', 'undead'].includes(cellClick.children[0].classList[1]) && !this.attackHero.includes(index)) {
-      GamePlay.showError('Not you hero!!!');
+      GamePlay.showError('This hero cannot be selected!');
     }
   }
 
   onCellEnter(index) {
     const cellEnter = this.gamePlay.cells[index];
-    if (this.moveHero.includes(index) && this.selectHero !== 0) {
+    if (this.moveHero.includes(index) && this.selectHero !== null) {
       this.gamePlay.selectCell(index, 'green');
     }
     if (cellEnter.title && !cellEnter.children[0]) {
@@ -353,20 +354,13 @@ export default class GameController {
   }
 
   onSaveGameClick() {
-    const { startPosition } = this;
-    const { points } = this;
-    const { theme } = this;
-    const { selectHero } = this;
-    const { stateHero } = this;
-    const gameState = {
-      startPosition,
-      points,
-      theme,
-      selectHero,
-      stateHero,
-    };
     localStorage.clear();
-    this.stateService.save(GameState.from(gameState));
+    this.stateService.save(GameState.from({
+      startPosition: this.startPosition,
+      points: this.points,
+      theme: this.theme,
+    }));
+    GamePlay.showMessage('Game saved');
   }
 
   onLoadGameClick() {
@@ -375,18 +369,17 @@ export default class GameController {
       loadGame.startPosition.forEach((elem) => {
         const obj = elem;
         if (obj.character.type === 'swordsman') {
-          obj.character = Object.create(new Swordsman());
+          Object.setPrototypeOf(obj.character, new Swordsman());
         } else if (obj.character.type === 'bowman') {
-          obj.character = Object.create(new Bowerman());
+          Object.setPrototypeOf(obj.character, new Bowerman());
         } else if (obj.character.type === 'magician') {
-          obj.character = Object.create(new Magician());
+          Object.setPrototypeOf(obj.character, new Magician());
         }
       });
       this.startPosition = loadGame.startPosition;
       this.gamePlay.drawUi(loadGame.theme);
       this.gamePlay.redrawPositions(loadGame.startPosition);
-      this.gamePlay.selectCell(loadGame.selectHero);
-      this.selectHero = loadGame.selectHero;
+      this.theme = loadGame.theme;
       this.getGameState(this.startPosition);
     } catch (e) {
       GamePlay.showError(e);
