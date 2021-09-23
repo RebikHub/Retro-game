@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import themes from './themes';
 import { generateTeam } from './generators';
 import Swordsman from './classes/swordsman';
@@ -178,14 +179,16 @@ export default class GameController {
 
   playAiMove(char, charPos) {
     const radiusMove = GameController.cellsMove(char, charPos);
-    const randomMove = Math.floor(Math.random() * radiusMove.length);
-    if (!this.gamePlay.cells[radiusMove[randomMove]].children[0]) {
-      for (let i = 0; i < this.startPosition.length; i += 1) {
-        if (this.startPosition[i].position === charPos) {
-          this.startPosition[i].position = radiusMove[randomMove];
-        }
+    let randomMove = Math.floor(Math.random() * radiusMove.length);
+    while (this.gamePlay.cells[radiusMove[randomMove]].children[0]) {
+      randomMove = Math.floor(Math.random() * radiusMove.length);
+    }
+    for (let i = 0; i < this.startPosition.length; i += 1) {
+      if (this.startPosition[i].position === charPos) {
+        this.startPosition[i].position = radiusMove[randomMove];
       }
     }
+
     this.gamePlay.setCursor(cursors.auto);
     this.gamePlay.redrawPositions(this.startPosition);
     this.getGameState(this.startPosition);
@@ -257,8 +260,14 @@ export default class GameController {
         this.generateHumHeroes(this.humanHeroes, 1, Math.max(1, Math.round(Math.random() * 3)));
       }
     } else if (document.querySelector('.mountain') !== null) {
-      this.gamePlay.redrawPositions([]);
-      throw GamePlay.showMessage(`Congratulation! You Win! Your points: ${this.points}`);
+      GamePlay.showMessage('Win!');
+      // eslint-disable-next-line no-restricted-globals
+      if (confirm('Continue playing?')) {
+        this.nextLoop();
+      } else {
+        GamePlay.showMessage(`You Win! Your points: ${this.points}`);
+        this.onNewGameClick();
+      }
     }
     this.gamePlay.drawUi(this.theme);
     for (let i = 0; i < this.humanTeam.length; i += 1) {
@@ -267,6 +276,27 @@ export default class GameController {
     this.startPositionChar(this.humanTeam, this.aiTeam);
     this.gamePlay.redrawPositions(this.startPosition);
     this.getGameState(this.startPosition);
+  }
+
+  nextLoop() {
+    if (this.humanTeam.length < 23) {
+      this.startPosHum = [0, 1, 2, 8, 9, 10, 16, 17, 18, 24, 25, 26, 32, 33, 34, 40, 41, 42, 48, 49, 50, 56, 57, 58];
+      this.startPosAi = [5, 6, 7, 13, 14, 15, 21, 22, 23, 29, 30, 31, 37, 38, 39, 45, 46, 47, 53, 54, 55, 61, 62, 63];
+      this.theme = themes.prairie;
+      for (let i = 0; i < 2; i += 1) {
+        this.generateHumHeroes(this.humanHeroes, 1, Math.max(1, Math.round(Math.random() * 4)));
+      }
+    } else if (this.humanTeam.length >= 23 && this.humanTeam.length < 31) {
+      this.startPosHum = [0, 1, 2, 3, 8, 9, 10, 11, 16, 17, 18, 19, 24, 25, 26, 27, 32, 33, 34, 35, 40, 41, 42, 43, 48, 49, 50, 51, 56, 57, 58, 59];
+      this.startPosAi = [4, 5, 6, 7, 12, 13, 14, 15, 20, 21, 22, 23, 28, 29, 30, 31, 36, 37, 38, 39, 44, 45, 46, 47, 52, 53, 54, 55, 60, 61, 62, 63];
+      this.theme = themes.prairie;
+      for (let i = 0; i < 2; i += 1) {
+        this.generateHumHeroes(this.humanHeroes, 1, Math.max(1, Math.round(Math.random() * 5)));
+      }
+    } else {
+      this.onNewGameClick();
+      throw GamePlay.showMessage(`Congratulation! You Wined Twice! Your points: ${this.points}`);
+    }
   }
 
   onCellClick(index) {
