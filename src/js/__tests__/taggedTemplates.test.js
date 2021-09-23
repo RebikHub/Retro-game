@@ -6,7 +6,7 @@ beforeEach(() => jest.resetAllMocks());
 
 test('should templates', () => {
   const gamePlay = new GamePlay();
-  const hero = new Bowerman(1);
+  const hero = new Bowerman();
   const medal = '\u{1F396}';
   const swords = '\u{2694}';
   const shield = '\u{1F6E1}';

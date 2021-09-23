@@ -365,22 +365,32 @@ export default class GameController {
       selectHero,
       stateHero,
     };
-    GameState.from(gameState);
     localStorage.clear();
     this.stateService.save(GameState.from(gameState));
   }
 
   onLoadGameClick() {
-    const loadGame = this.stateService.load();
-    const b = new Bowerman();
-    loadGame.startPosition.forEach((elem) => {
-      const obj = elem.character;
-      obj.levelUp = b.levelUp.bind(obj);
-    });
-    this.startPosition = loadGame.startPosition;
-    this.gamePlay.drawUi(loadGame.theme);
-    this.gamePlay.redrawPositions(loadGame.startPosition);
-    this.getGameState(this.startPosition);
+    try {
+      const loadGame = this.stateService.load();
+      loadGame.startPosition.forEach((elem) => {
+        const obj = elem;
+        if (obj.character.type === 'swordsman') {
+          obj.character = Object.create(new Swordsman());
+        } else if (obj.character.type === 'bowman') {
+          obj.character = Object.create(new Bowerman());
+        } else if (obj.character.type === 'magician') {
+          obj.character = Object.create(new Magician());
+        }
+      });
+      this.startPosition = loadGame.startPosition;
+      this.gamePlay.drawUi(loadGame.theme);
+      this.gamePlay.redrawPositions(loadGame.startPosition);
+      this.gamePlay.selectCell(loadGame.selectHero);
+      this.selectHero = loadGame.selectHero;
+      this.getGameState(this.startPosition);
+    } catch (e) {
+      GamePlay.showError(e);
+    }
   }
 
   static moveCharacter(character) {

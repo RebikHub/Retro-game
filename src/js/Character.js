@@ -1,8 +1,8 @@
 export default class Character {
   constructor(type = 'generic') {
-    // if (new.target === Character) {
-    //   throw new Error('user use new Character()!!!');
-    // }
+    if (new.target === Character) {
+      throw new Error('user use new Character()!!!');
+    }
     this.level = 1;
     this.attack = 0;
     this.defence = 0;
