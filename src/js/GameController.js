@@ -257,7 +257,7 @@ export default class GameController {
       }
     } else if (document.querySelector('.mountain') !== null) {
       this.gamePlay.redrawPositions([]);
-      throw GamePlay.showMessage('Congratulation! You Win!');
+      throw GamePlay.showMessage(`Congratulation! You Win! Your points: ${this.points}`);
     }
     this.gamePlay.drawUi(this.theme);
     for (let i = 0; i < this.humanTeam.length; i += 1) {
