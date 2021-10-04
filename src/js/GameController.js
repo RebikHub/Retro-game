@@ -418,30 +418,8 @@ export default class GameController {
     }
   }
 
-  static moveCharacter(character) {
-    if (character.type === 'bowman' || character.type === 'vampire') {
-      return 3;
-    } if (character.type === 'swordsman' || character.type === 'undead') {
-      return 5;
-    } if (character.type === 'magician' || character.type === 'daemon') {
-      return 2;
-    }
-    return 'error not character!';
-  }
-
-  static attackCharacter(character) {
-    if (character.type === 'bowman' || character.type === 'vampire') {
-      return 3;
-    } if (character.type === 'swordsman' || character.type === 'undead') {
-      return 2;
-    } if (character.type === 'magician' || character.type === 'daemon') {
-      return 5;
-    }
-    return 'error not character!';
-  }
-
   static cellsMove(character, index) {
-    const char = GameController.moveCharacter(character);
+    const char = character.moveCell;
     const arr = [];
     const arrHor = [];
     const arrSize = 8;
@@ -499,7 +477,7 @@ export default class GameController {
   }
 
   static cellsAttack(character, index) {
-    const char = GameController.attackCharacter(character);
+    const char = character.attackCell;
     const arr = [];
     const arrHor = [];
     const arrSize = 8;

@@ -6,5 +6,7 @@ export default class Vampire extends Character {
     this.type = 'vampire';
     this.attack = 25;
     this.defence = 25;
+    this.moveCell = 3;
+    this.attackCell = 3;
   }
 }
