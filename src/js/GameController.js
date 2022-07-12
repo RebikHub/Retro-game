@@ -111,7 +111,7 @@ export default class GameController {
       for (let i = 0; i < this.startPosition.length; i += 1) {
         if (index === this.startPosition[i].position) {
           const target = this.startPosition[i].character;
-          const diff = character.attack - target.defence;
+          const diff = character.attack - target.defense;
           let odd = 0;
           if (diff <= 0 && diff > (-15)) {
             odd = 0.6;
@@ -201,7 +201,7 @@ export default class GameController {
       if (index === statePosition[j].position) {
         const target = statePosition[j].character;
         targetPosition = index;
-        const diff = character.attack - target.defence;
+        const diff = character.attack - target.defense;
         let odd = 0;
         if (diff <= 0 && diff > (-15)) {
           odd = 0.6;
@@ -339,13 +339,13 @@ export default class GameController {
         if (this.humanTeam[i].position === index) {
           this.gamePlay.setCursor(cursors.pointer);
           const health = cellEnter.querySelector('.health-level-indicator').style.width;
-          message = `${medal} ${this.humanTeam[i].level} ${swords} ${this.humanTeam[i].attack} ${shield} ${this.humanTeam[i].defence} ${heart} ${health}`;
+          message = `${medal} ${this.humanTeam[i].level} ${swords} ${this.humanTeam[i].attack} ${shield} ${this.humanTeam[i].defense} ${heart} ${health}`;
         }
       }
       for (let i = 0; i < this.aiTeam.length; i += 1) {
         if (this.aiTeam[i].position === index) {
           const health = cellEnter.querySelector('.health-level-indicator').style.width;
-          message = `${medal} ${this.aiTeam[i].level} ${swords} ${this.aiTeam[i].attack} ${shield} ${this.aiTeam[i].defence} ${heart} ${health}`;
+          message = `${medal} ${this.aiTeam[i].level} ${swords} ${this.aiTeam[i].attack} ${shield} ${this.aiTeam[i].defense} ${heart} ${health}`;
           if (this.humanTeam.includes(this.stateHero) && this.attackHero.includes(index)) {
             this.gamePlay.setCursor(cursors.crosshair);
             this.gamePlay.selectCell(index, 'red');

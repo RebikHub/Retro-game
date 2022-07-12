@@ -5,7 +5,7 @@ export default class Bowerman extends Character {
     super(level);
     this.type = 'bowman';
     this.attack = 25;
-    this.defence = 25;
+    this.defense = 25;
     this.moveCell = 3;
     this.attackCell = 3;
   }

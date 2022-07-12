@@ -5,7 +5,7 @@ export default class Magician extends Character {
     super(level);
     this.type = 'magician';
     this.attack = 10;
-    this.defence = 40;
+    this.defense = 40;
     this.moveCell = 2;
     this.attackCell = 5;
   }
