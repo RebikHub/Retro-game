@@ -1,6 +1,6 @@
 # Дипломное задание к курсу «Продвинутый JavaScript». Retro Game
 
-[Retro Game Link](https://rebikhub.github.io/ajs-retro-game/)
+[Retro Game Link](https://rebikhub.github.io/Retro-game/)
 
 ###### tags: `netology` `advanced js`
 
