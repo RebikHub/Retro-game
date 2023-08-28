@@ -1,4 +1,4 @@
-import Character from '../Character';
+import Character from '../base-character/Character';
 
 export default class Swordsman extends Character {
   constructor(level) {

@@ -1,16 +1,15 @@
-/* eslint-disable max-len */
-import themes from './themes';
-import { generateTeam } from './generators';
-import Swordsman from './classes/swordsman';
-import Bowerman from './classes/bowerman';
-import Magician from './classes/magician';
-import Daemon from './classes/daemon';
-import Vampire from './classes/vampire';
-import Undead from './classes/undead';
-import PositionedCharacter from './PositionedCharacter';
-import GamePlay from './GamePlay';
-import GameState from './GameState';
-import cursors from './cursors';
+import themes from '../../themes';
+import { generateTeam } from '../../generators';
+import Swordsman from '../caharecters/swordsman';
+import Bowerman from '../caharecters/bowerman';
+import Magician from '../caharecters/magician';
+import Daemon from '../caharecters/daemon';
+import Vampire from '../caharecters/vampire';
+import Undead from '../caharecters/undead';
+import PositionedCharacter from '../position-character/PositionedCharacter';
+import GamePlay from '../play/GamePlay';
+import GameState from '../../GameState';
+import cursors from '../../cursors';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -261,8 +260,7 @@ export default class GameController {
       }
     } else if (document.querySelector('.mountain') !== null) {
       GamePlay.showMessage('Win!');
-      // eslint-disable-next-line no-restricted-globals
-      if (confirm('Continue playing?')) {
+      if (window.document.confirm('Continue playing?')) {
         this.nextLoop();
       } else {
         GamePlay.showMessage(`You Win! Your points: ${this.points}`);
@@ -280,15 +278,25 @@ export default class GameController {
 
   nextLoop() {
     if (this.humanTeam.length < 23) {
-      this.startPosHum = [0, 1, 2, 8, 9, 10, 16, 17, 18, 24, 25, 26, 32, 33, 34, 40, 41, 42, 48, 49, 50, 56, 57, 58];
-      this.startPosAi = [5, 6, 7, 13, 14, 15, 21, 22, 23, 29, 30, 31, 37, 38, 39, 45, 46, 47, 53, 54, 55, 61, 62, 63];
+      this.startPosHum = [
+        0, 1, 2, 8, 9, 10, 16, 17, 18, 24, 25, 26, 32, 33, 34, 40, 41, 42, 48, 49, 50, 56, 57, 58,
+      ];
+      this.startPosAi = [
+        5, 6, 7, 13, 14, 15, 21, 22, 23, 29, 30, 31, 37, 38, 39, 45, 46, 47, 53, 54, 55, 61, 62, 63,
+      ];
       this.theme = themes.prairie;
       for (let i = 0; i < 2; i += 1) {
         this.generateHumHeroes(this.humanHeroes, 1, Math.max(1, Math.round(Math.random() * 4)));
       }
     } else if (this.humanTeam.length >= 23 && this.humanTeam.length < 31) {
-      this.startPosHum = [0, 1, 2, 3, 8, 9, 10, 11, 16, 17, 18, 19, 24, 25, 26, 27, 32, 33, 34, 35, 40, 41, 42, 43, 48, 49, 50, 51, 56, 57, 58, 59];
-      this.startPosAi = [4, 5, 6, 7, 12, 13, 14, 15, 20, 21, 22, 23, 28, 29, 30, 31, 36, 37, 38, 39, 44, 45, 46, 47, 52, 53, 54, 55, 60, 61, 62, 63];
+      this.startPosHum = [
+        0, 1, 2, 3, 8, 9, 10, 11, 16, 17, 18, 19, 24, 25, 26, 27, 32,
+        33, 34, 35, 40, 41, 42, 43, 48, 49, 50, 51, 56, 57, 58, 59,
+      ];
+      this.startPosAi = [
+        4, 5, 6, 7, 12, 13, 14, 15, 20, 21, 22, 23, 28, 29, 30, 31, 36,
+        37, 38, 39, 44, 45, 46, 47, 52, 53, 54, 55, 60, 61, 62, 63,
+      ];
       this.theme = themes.prairie;
       for (let i = 0; i < 2; i += 1) {
         this.generateHumHeroes(this.humanHeroes, 1, Math.max(1, Math.round(Math.random() * 5)));

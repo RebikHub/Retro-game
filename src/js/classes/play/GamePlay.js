@@ -1,4 +1,4 @@
-import { calcHealthLevel, calcTileType } from './utils';
+import { calcHealthLevel, calcTileType } from '../../shared/utils';
 
 export default class GamePlay {
   constructor() {
@@ -178,11 +178,11 @@ export default class GamePlay {
   }
 
   static showError(message) {
-    alert(message);
+    window.document.alert(message);
   }
 
   static showMessage(message) {
-    alert(message);
+    window.document.alert(message);
   }
 
   selectCell(index, color = 'yellow') {
